@@ -4,31 +4,15 @@ pipeline {
         skipStagesAfterUnstable()
     }
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'python:2-alpine'
-                }
-            }
-            steps {
-                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-                stash(name: 'compiled-results', includes: 'sources/*.py*')
-            }
+        stage('build') {
+          steps {
+            sh 'pip install -r requirements.txt'
+          }
         }
-        stage('Test') {
-            agent {
-                docker {
-                    image 'qnib/pytest'
-                }
-            }
-            steps {
-                sh 'py.test --junit-xml test-reports/results.xml sources/test_calc.py'
-            }
-            post {
-                always {
-                    junit 'test-reports/results.xml'
-                }
-            }
+        stage('test') {
+          steps {
+            sh 'python test.py'
+          }   
         }
-    }
+  }
 }
